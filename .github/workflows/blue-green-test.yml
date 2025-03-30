@@ -47,3 +47,28 @@ jobs:
         echo "* 실행 이벤트: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
         echo "* 실행 저장소: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
         echo "* 실행 브랜치: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+        # 스타일 체크 수행행
+    - name: Run Checkstyle
+      run: |
+        mkdir -p build/reports/checkstyle
+        ./gradlew checkstyleMain checkstyleTest --info
+        ls -la build/reports/checkstyle || true 
+    # 스타일 체크 결과 업로드
+    - name: Upload Checkstyle results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: checkstyle-report
+        path: build/reports/checkstyle/
+        retention-days: 14
+    # 분석 결과 표시 
+    - name: Generate list using Markdown
+      run: |
+        echo "## 코드 스타일 분석결과" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ -f build/reports/checkstyle/main.xml ]; then # 소스분석결과 존재시
+          echo "### 소스분석결과" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat build/reports/checkstyle/main.xml >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
