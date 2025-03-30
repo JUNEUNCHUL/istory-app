@@ -1,0 +1,49 @@
+name: istory ci test
+
+on:
+  push:
+    branches: [ "test"]
+    paths:
+      - '.github/workflows/ec2-ci.yml'
+      - 'scripts/**'
+      - 'appspec.yml'
+jobs:
+  verify_pipeline:
+    environment: prod
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          # root 계정 비밀번호
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          # 사용자 계정
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          # 사용자 계정 비밀번호
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          # 사용자 계정 데이터베이스
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+    steps:
+    - name: Source Code Checkout
+      uses: actions/checkout@v4 
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Generate Basic Info in Markdown
+      run: |
+        echo "## 워크플로우 실행 정보 요약" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "* 실행 담당자: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "* 실행 이벤트: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "* 실행 저장소: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+        echo "* 실행 브랜치: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
