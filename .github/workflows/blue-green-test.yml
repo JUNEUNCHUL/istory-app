@@ -9,7 +9,7 @@ on:
       - 'appspec.yml'
 jobs:
   verify_pipeline:
-    environment: action
+    environment: prod
     runs-on: ubuntu-latest
     services:
       mysql:
