@@ -2,9 +2,9 @@ name: istory Blue/Green ci test
 
 on:
   push:
-    branches: [ "test"]
+    branches: [ "test" ]
     paths:
-      - '.github/workflows/ec2-ci.yml'
+      - '.github/workflows/blue-green-test.yml'
       - 'scripts/**'
       - 'appspec.yml'
 jobs:
